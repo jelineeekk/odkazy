@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+      /* Kontejner pro zobrazení odkazu */
+      #linkContainer {
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: rgba(0, 0, 0, 0.8);
+          padding: 20px;
+          border-radius: 10px;
+          display: none;
+          z-index: 9999;
+      }
+      #linkContainer a {
+          color: #4CAF50;
+          font-size: 20px;
+          text-decoration: none;
+      }
+      #linkContainer button {
+          margin-top: 10px;
+          padding: 5px 10px;
+      }
+    </style>
+    <script>
+        window.addEventListener('message', function(event) {
+            if (event.data.action === 'copy') {
+                copyText(event.data.text);
+            } else if (event.data.action === 'open') {
+                showLink(event.data.url);
+            }
+        });
+
+        function copyText(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                console.log("Copy command was successful");
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function showLink(url) {
+            const container = document.getElementById('linkContainer');
+            const linkElement = document.getElementById('linkElement');
+            linkElement.href = url;
+            linkElement.innerText = "Klikněte zde pro otevření odkazu";
+            container.style.display = 'block';
+        }
+
+        function closeLink() {
+            document.getElementById('linkContainer').style.display = 'none';
+            fetch(`https://${GetParentResourceName()}/closeUI`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+                body: JSON.stringify({})
+            });
+        }
+    </script>
+</head>
+<body>
+    <div id="linkContainer">
+        <a id="linkElement" target="_blank" onclick="closeLink()">Odkaz</a>
+        <br>
+        <button onclick="closeLink()">Zavřít</button>
+    </div>
+</body>
+</html>
